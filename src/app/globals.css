@@ -1,0 +1,292 @@
+/* Updated: 2025-10-17T19:22:01.229Z */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Shadcn/UI colors - Dark Theme */
+  --color-background: #000000;
+  --color-foreground: #ffffff;
+
+  --color-card: #1a1a1a;
+  --color-card-foreground: #ffffff;
+
+  --color-popover: #000000;
+  --color-popover-foreground: #ffffff;
+
+  --color-primary: #00ff00; /* Terminal green for primary actions/text */
+  --color-primary-foreground: #000000;
+
+  --color-secondary: #2d2d2d; /* Slightly lighter background for interactive card */
+  --color-secondary-foreground: #ffffff;
+
+  --color-muted: #a0a0a0; /* Muted gray for secondary text */
+  --color-muted-foreground: #ffffff;
+
+  --color-accent: #4d9fff; /* Terminal blue for accents like prompt user@host */
+  --color-accent-foreground: #000000;
+
+  --color-destructive: #ff0000; /* Red for destructive actions/timestamp */
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #00ff00; /* Green border for terminal elements */
+  --color-input: #000000;
+  --color-ring: #00ff00;
+
+  /* Chart colors (keeping Shadcn defaults as no specific chart colors are provided) */
+  --color-chart-1: #e67e22;
+  --color-chart-2: #2d8659;
+  --color-chart-3: #1e3a5f;
+  --color-chart-4: #f1c40f;
+  --color-chart-5: #e74c3c;
+
+  /* Sidebar colors (keeping Shadcn defaults as no specific sidebar colors are provided) */
+  --color-sidebar: #1a1a1a;
+  --color-sidebar-foreground: #f0f0f0;
+  --color-sidebar-primary: #3b82f6;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #292929;
+  --color-sidebar-accent-foreground: #f0f0f0;
+  --color-sidebar-border: #292929;
+  --color-sidebar-ring: #3b82f6;
+
+  /* Custom Design System Colors */
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #1a1a1a;
+  --color-bg-tertiary: #2d2d2d;
+  --color-text-primary: #ffffff;
+  --color-text-terminal: #00ff00;
+  --color-text-command: #4d9fff;
+  --color-text-secondary: #a0a0a0;
+  --color-accent-green: #00ff00;
+  --color-accent-blue: #4d9fff;
+  --color-border-green: #00ff00;
+  --color-timestamp-red: #ff0000;
+
+  /* Custom Design System Typography */
+  --font-display: "Courier Prime", monospace;
+  --font-body: "Courier Prime", monospace;
+  --font-terminal: "Courier Prime", monospace;
+
+  --text-header-name: 24px;
+  --text-subtitle: 14px;
+  --text-terminal-prompt: 16px;
+  --text-terminal-command: 16px;
+  --text-body: 15px; /* Using 15px as a common value between 15-16px */
+  --text-nav-link: 14px;
+  --text-card-label: 13px;
+  --text-timestamp: 12px;
+
+  --font-weight-bold: 700;
+  --font-weight-regular: 400;
+
+  --leading-normal: 1.6;
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+
+  --tracking-wide: 0.5px;
+  --tracking-normal: 0;
+  --tracking-tight: 0.3px;
+
+  /* Shadcn/UI Radii */
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+
+  /* Custom Design System Radii */
+  --radius-card: 16px;
+  --radius-profile-image: 12px;
+
+  /* Shadcn/UI Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  /* Custom Animations */
+  @keyframes blink {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
+}
+
+@layer utilities {
+  body {
+    font-family: var(--font-body);
+  }
+}
+
+@layer base {
+  :root {
+    /* Shadcn/UI CSS Variables - Dark Theme */
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --card: var(--color-card);
+    --card-foreground: var(--color-card-foreground);
+    --popover: var(--color-popover);
+    --popover-foreground: var(--color-popover-foreground);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-primary-foreground);
+    --secondary: var(--color-secondary);
+    --secondary-foreground: var(--color-secondary-foreground);
+    --muted: var(--color-muted);
+    --muted-foreground: var(--color-muted-foreground);
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-accent-foreground);
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-destructive-foreground);
+    --border: var(--color-border);
+    --input: var(--color-input);
+    --ring: var(--color-ring);
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+    --radius: var(--radius-lg); /* Default radius for Shadcn components */
+    --sidebar-background: var(--color-sidebar);
+    --sidebar-foreground: var(--color-sidebar-foreground);
+    --sidebar-primary: var(--color-sidebar-primary);
+    --sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+    --sidebar-accent: var(--color-sidebar-accent);
+    --sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+    --sidebar-border: var(--color-sidebar-border);
+    --sidebar-ring: var(--color-sidebar-ring);
+  }
+
+  * {
+    border-color: var(--border);
+    -webkit-font-smoothing: none; /* Disable font smoothing for retro terminal effect */
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    line-height: var(--leading-normal);
+  }
+
+  h1 {
+    font-size: var(--text-header-name);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-terminal);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  h2 {
+    font-size: var(--text-subtitle);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  p {
+    font-size: var(--text-body);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+  }
+
+  a {
+    color: var(--color-accent-green);
+    text-decoration: none;
+    transition: color 150ms ease-in-out;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .terminal-prompt {
+    font-size: var(--text-terminal-prompt);
+    font-family: var(--font-terminal);
+    line-height: var(--leading-normal);
+  }
+
+  .terminal-command {
+    font-size: var(--text-terminal-command);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-terminal);
+    font-family: var(--font-terminal);
+    line-height: var(--leading-normal);
+  }
+
+  .terminal-output {
+    font-size: var(--text-body);
+    font-family: var(--font-terminal);
+    line-height: var(--leading-normal);
+    color: var(--color-text-primary);
+  }
+
+  .nav-link {
+    font-size: var(--text-nav-link);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-accent-green);
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-snug);
+  }
+
+  .card-label {
+    font-size: var(--text-card-label);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-accent-green);
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-snug);
+  }
+
+  .timestamp {
+    font-size: var(--text-timestamp);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-timestamp-red);
+    line-height: var(--leading-tight);
+  }
+
+  .cursor {
+    animation: blink 1s step-end infinite;
+  }
+}
+
+/* Hide Next.js error overlay portal */
+nextjs-portal {
+  display: none !important;
+}
