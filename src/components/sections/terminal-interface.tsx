@@ -168,6 +168,9 @@ It allows colleges to easily record and manage student attendance, generate repo
 
 - Technologies: [HTML,CSS,JAVASCRIPT]
 - Link: https://attance.netlify.app
+
+-For more such project checkout my github
+GitHub: https://github.com/Nihar-Shadow
     `,
     skills: `
 Technical Skills:
