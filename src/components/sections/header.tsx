@@ -8,7 +8,7 @@ export default function Header() {
         Nihar Pradhan
         </h1>
         <h2 className="text-[#808080] text-xs md:text-sm mt-1">
-          CyberSecurity Analyst
+          CyberSecurity Student
         </h2>
       </div>
     </header>

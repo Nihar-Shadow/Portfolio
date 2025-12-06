@@ -10,8 +10,6 @@ const COMMANDS = [
   "contact",
   "education",
   "certifications",
-  "leadership",
-  "sudo",
   "clear",
 ];
 

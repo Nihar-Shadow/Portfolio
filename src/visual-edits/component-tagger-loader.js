@@ -1,13 +1,11 @@
-
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = componentTagger;
-const parser_1 = require("@babel/parser");
-const magic_string_1 = require("magic-string");
-const estree_walker_1 = require("estree-walker");
-const path = require("path");
-/* ───────────────────────────────────────────── Blacklists */
-const threeFiberElems = [
+const { parse } = require('@babel/parser');
+const { walk } = require('estree-walker');
+const MagicString = require('magic-string');
+const path = require('path');
+
+// List of Three.js elements to tag
+const threeElems = [
     "object3D",
     "audioListener",
     "positionalAudio",
@@ -148,11 +146,12 @@ const threeFiberElems = [
     "shape",
     "colorShiftMaterial"
 ];
+
 const dreiElems = [
     "AsciiRenderer",
     "Billboard",
     "Clone",
-    "ComputedAttribute",
+    "ComputedAttribute",    
     "Decal",
     "Edges",
     "Effects",
@@ -210,207 +209,241 @@ const dreiElems = [
     "AdaptiveDpr",
     "AdaptiveEvents",
     "BakeShadows",
-    "Bvh",
+    "Center",
+    "ContactShadows",
     "Detailed",
-    "Instances",
-    "Merged",
-    "meshBounds",
-    "PerformanceMonitor",
-    "Points",
-    "Preload",
-    "Segments",
-    "Fisheye",
+    "Environment",
+    "Float",
+    "GradientTexture",
     "Hud",
     "Mask",
-    "MeshPortalMaterial",
-    "RenderCubeTexture",
-    "RenderTexture",
-    "View",
+    "Mask2",
+    "Mask3",
     "MeshDiscardMaterial",
     "MeshDistortMaterial",
     "MeshReflectorMaterial",
     "MeshRefractionMaterial",
     "MeshTransmissionMaterial",
     "MeshWobbleMaterial",
-    "PointMaterial",
-    "shaderMaterial",
-    "SoftShadows",
-    "CatmullRomLine",
-    "CubicBezierLine",
-    "Facemesh",
-    "Line",
-    "Mesh",
-    "QuadraticBezierLine",
-    "RoundedBox",
-    "ScreenQuad",
-    "AccumulativeShadows",
-    "Backdrop",
-    "BBAnchor",
-    "Bounds",
-    "CameraShake",
-    "Caustics",
-    "Center",
-    "Cloud",
-    "ContactShadows",
-    "Environment",
-    "Float",
-    "Lightformer",
-    "MatcapTexture",
-    "NormalTexture",
-    "RandomizedLight",
-    "Resize",
-    "ShadowAlpha",
+    "Outlines",
+    "PerformanceMonitor",
+    "Preload",
+    "RenderCubeTexture",
+    "RenderTexture",
+    "Sampler",
+    "Segments",
     "Shadow",
-    "Sky",
-    "Sparkles",
-    "SpotLightShadow",
+    "Shadows",
+    "SoftShadows",
     "SpotLight",
     "Stage",
     "Stars",
-    "OrbitControls"
+    "Svg",
+    "useCubeCamera",
+    "useAnimations",
+    "useAspect",
+    "useCamera",
+    "useContextBridge",
+    "useCursor",
+    "useDetectGPU",
+    "useEnvironment",
+    "useGLTF",
+    "useGraph",
+    "useHelper",
+    "useIntersect",
+    "useKTX2",
+    "useMatcapTexture",
+    "useMask",
+    "useMaskTexture",
+    "useNormalTexture",
+    "useProgress",
+    "useScroll",
+    "useTexture",
+    "useTrail",
+    "useVideoTexture",
+    "useWebcamTexture",
+    "useDepthBuffer",
+    "useInstancedMesh",
+    "useInstancedMeshes",
+    "usePointLight",
+    "useSpotLight",
+    "useDirectionalLight",
+    "useAmbientLight",
+    "useHemisphereLight",
+    "useRectAreaLight",
+    "useBoxProjectedEnv",
+    "useGLTFLoader",
+    "useFBXLoader",
+    "useOBJLoader",
+    "useMeshPhysicalMaterial",
+    "useMeshStandardMaterial",
+    "useMeshPhongMaterial",
+    "useMeshToonMaterial",
+    "useMeshNormalMaterial",
+    "useMeshLambertMaterial",
+    "useMeshDepthMaterial",
+    "useMeshDistanceMaterial",
+    "useMeshBasicMaterial",
+    "useMeshMatcapMaterial",
+    "useLineDashedMaterial",
+    "useLineBasicMaterial",
+    "usePointsMaterial",
+    "useShaderMaterial",
+    "useRawShaderMaterial",
+    "useSpriteMaterial",
+    "useShadowMaterial",
+    "useTexture2D",
+    "useTexture3D",
+    "useCompressedTexture",
+    "useCubeTexture",
+    "useCanvasTexture",
+    "useDepthTexture",
+    "useVideoTexture",
+    "useDataTexture",
+    "useDataTexture3D",
+    "useRaycaster",
+    "useVector2",
+    "useVector3",
+    "useVector4",
+    "useEuler",
+    "useMatrix3",
+    "useMatrix4",
+    "useQuaternion",
+    "useBufferAttribute",
+    "useFloat16BufferAttribute",
+    "useFloat32BufferAttribute",
+    "useFloat64BufferAttribute",
+    "useInt8BufferAttribute",
+    "useInt16BufferAttribute",
+    "useInt32BufferAttribute",
+    "useUint8BufferAttribute",
+    "useUint16BufferAttribute",
+    "useUint32BufferAttribute",
+    "useInstancedBufferAttribute",
+    "useColor",
+    "useFog",
+    "useFogExp2",
+    "useShape",
+    "useColorShiftMaterial"
 ];
-// Exclude all Three.js/R3F related components from tagging
-const shouldTag = (name) => {
-  // Skip all Three.js/R3F components
-  if (threeFiberElems.includes(name) || dreiElems.includes(name) || name === 'Canvas') {
-    return false;
-  }
-  
-  // Skip any animated.* components from @react-spring/three
-  if (name.startsWith('animated.')) {
-    return false;
-  }
-  
-  return true;
-};
-// ➕ Collect aliases of the Next.js <Image> component so we can reliably tag it even if it was renamed.
-const isNextImageAlias = (aliases, name) => aliases.has(name);
-const extractLiteralValue = (node) => {
-    if (!node)
-        return undefined;
-    switch (node.type) {
-        case 'StringLiteral':
-            return node.value;
-        case 'NumericLiteral':
-            return node.value;
-        case 'BooleanLiteral':
-            return node.value;
-        case 'ObjectExpression':
-            const obj = {};
-            for (const prop of node.properties) {
-                if (prop.type === 'ObjectProperty' && !prop.computed) {
-                    const key = prop.key.type === 'Identifier' ? prop.key.name : prop.key.value;
-                    obj[key] = extractLiteralValue(prop.value);
-                }
-            }
-            return obj;
-        case 'ArrayExpression':
-            return node.elements.map((el) => extractLiteralValue(el));
-        default:
-            return undefined;
-    }
-};
-const findVariableDeclarations = (ast) => {
+
+// Helper functions
+function shouldTag(name) {
+    const lowerName = name.toLowerCase();
+    return threeElems.some(elem => lowerName === elem.toLowerCase()) ||
+           dreiElems.some(elem => lowerName === elem.toLowerCase());
+}
+
+function isNextImageAlias(aliases, name) {
+    return aliases.has(name);
+}
+
+function findVariableDeclarations(ast) {
     const variables = new Map();
-    (0, estree_walker_1.walk)(ast, {
-        enter(node) {
-            var _a;
-            // Handle const/let/var declarations
-            if (node.type === 'VariableDeclaration') {
-                for (const declarator of node.declarations) {
-                    if (declarator.id.type === 'Identifier' && declarator.init) {
-                        const varName = declarator.id.name;
-                        const value = extractLiteralValue(declarator.init);
-                        variables.set(varName, {
-                            name: varName,
-                            type: Array.isArray(value) ? 'array' : typeof value === 'object' ? 'object' : 'primitive',
-                            value,
-                            arrayItems: Array.isArray(value) ? value : undefined,
-                            loc: (_a = declarator.loc) === null || _a === void 0 ? void 0 : _a.start
-                        });
-                    }
-                }
+    walk(ast, {
+        enter(node, parent) {
+            if (node.type === 'VariableDeclarator' && node.id.type === 'Identifier') {
+                variables.set(node.id.name, {
+                    node,
+                    parent,
+                    loc: node.loc
+                });
             }
         }
     });
     return variables;
-};
-const findMapContext = (node, variables) => {
-    var _a, _b, _c, _d, _e, _f, _g;
-    // Walk up the tree to find if this JSX element is inside a map call
+}
+
+function findMapContext(node, variables) {
+    // Check if we're inside a map function
     let current = node;
-    let depth = 0;
-    const maxDepth = 10; // Prevent infinite loops
-    while (current && depth < maxDepth) {
-        if (current.type === 'CallExpression' &&
-            ((_a = current.callee) === null || _a === void 0 ? void 0 : _a.type) === 'MemberExpression' &&
-            ((_c = (_b = current.callee) === null || _b === void 0 ? void 0 : _b.property) === null || _c === void 0 ? void 0 : _c.name) === 'map') {
-            // Found a .map() call, check if it's on a known array
-            const arrayName = (_d = current.callee.object) === null || _d === void 0 ? void 0 : _d.name;
-            const mapCallback = (_e = current.arguments) === null || _e === void 0 ? void 0 : _e[0];
-            if (arrayName && (mapCallback === null || mapCallback === void 0 ? void 0 : mapCallback.type) === 'ArrowFunctionExpression') {
-                const itemParam = (_f = mapCallback.params) === null || _f === void 0 ? void 0 : _f[0];
-                const indexParam = (_g = mapCallback.params) === null || _g === void 0 ? void 0 : _g[1];
-                if ((itemParam === null || itemParam === void 0 ? void 0 : itemParam.type) === 'Identifier') {
-                    const varInfo = variables.get(arrayName);
-                    return {
-                        arrayName,
-                        itemVarName: itemParam.name,
-                        arrayItems: varInfo === null || varInfo === void 0 ? void 0 : varInfo.arrayItems,
-                        arrayLoc: varInfo === null || varInfo === void 0 ? void 0 : varInfo.loc,
-                        indexVarName: (indexParam === null || indexParam === void 0 ? void 0 : indexParam.type) === 'Identifier' ? indexParam.name : undefined
-                    };
-                }
+    while (current && current.type !== 'CallExpression') {
+        current = current.parent;
+    }
+    
+    if (!current || !current.callee || current.callee.type !== 'MemberExpression') {
+        return null;
+    }
+    
+    const callee = current.callee;
+    if (callee.property.type !== 'Identifier' || callee.property.name !== 'map') {
+        return null;
+    }
+    
+    // Get the array name
+    let arrayName = '';
+    if (callee.object.type === 'Identifier') {
+        arrayName = callee.object.name;
+    }
+    
+    // Find the index variable if it exists
+    let indexVarName = null;
+    if (current.arguments.length > 0 && 
+        current.arguments[0].type === 'ArrowFunctionExpression' && 
+        current.arguments[0].params.length > 1) {
+        indexVarName = current.arguments[0].params[1].name;
+    }
+    
+    return { arrayName, indexVarName };
+}
+
+function getSemanticName(node, mapContext, imageAliases) {
+    if (node.name.type !== 'JSXIdentifier' && node.name.type !== 'JSXMemberExpression') {
+        return null;
+    }
+    
+    let name = '';
+    if (node.name.type === 'JSXIdentifier') {
+        name = node.name.name;
+    } else {
+        // Handle member expressions like Foo.Bar
+        let current = node.name;
+        const parts = [];
+        while (current) {
+            if (current.type === 'JSXMemberExpression') {
+                parts.unshift(current.property.name);
+                current = current.object;
+            } else if (current.type === 'JSXIdentifier') {
+                parts.unshift(current.name);
+                break;
+            } else {
+                break;
             }
         }
-        current = current.parent;
-        depth++;
+        name = parts.join('-');
     }
-    return null;
-};
-const getSemanticName = (node, mapContext, imageAliases) => {
-    const getName = () => {
-        if (node.name.type === 'JSXIdentifier')
-            return node.name.name;
-        if (node.name.type === 'JSXMemberExpression')
-            return `${node.name.object.name}.${node.name.property.name}`;
-        return null;
-    };
-    const tagName = getName();
-    if (!tagName)
-        return null;
-    // For Next.js Image components, always return 'img' so the name is a valid HTML tag.
-    if (isNextImageAlias(imageAliases, tagName)) {
-        return 'img';
+    
+    // Add map context if available
+    if (mapContext && mapContext.arrayName) {
+        name = `${name}-${mapContext.arrayName}`;
     }
-    return isNextImageAlias(imageAliases, tagName) ? 'img' : tagName;
-};
-/* ───────────────────────────────────────────── Loader */
-function componentTagger(src, map) {
-    const done = this.async();
+    
+    return name;
+}
+
+// Main loader function
+function processCode(src, map, resourcePath, done) {
     try {
-        if (/node_modules/.test(this.resourcePath))
+        const rel = path.relative(process.cwd(), resourcePath);
+        const ms = new MagicString(src);
+        let mutated = false;
+        
+        // Skip non-JSX files
+        if (!src.includes('JSX')) {
             return done(null, src, map);
-        const ast = (0, parser_1.parse)(src, {
+        }
+        
+        // Parse the code
+        const ast = parse(src, {
             sourceType: 'module',
             plugins: ['jsx', 'typescript'],
+            locations: true
         });
-        const ms = new magic_string_1.default(src);
-        const rel = path.relative(process.cwd(), this.resourcePath);
-        let mutated = false;
-        // Add parent references to AST nodes for upward traversal (non-enumerable to avoid infinite recursion)
-        (0, estree_walker_1.walk)(ast, {
-            enter(node, parent) {
-                if (parent && !Object.prototype.hasOwnProperty.call(node, 'parent')) {
-                    Object.defineProperty(node, 'parent', { value: parent, enumerable: false });
-                }
-            }
-        });
-        // 0️⃣ Collect variable declarations first
+        
         const variables = findVariableDeclarations(ast);
         // 1️⃣ Gather local identifiers that reference `next/image`.
         const imageAliases = new Set();
-        (0, estree_walker_1.walk)(ast, {
+        walk(ast, {
             enter(node) {
                 if (node.type === 'ImportDeclaration' &&
                     node.source.value === 'next/image') {
@@ -420,10 +453,10 @@ function componentTagger(src, map) {
                 }
             },
         });
+        
         // 2️⃣ Inject attributes with enhanced semantic context.
-        (0, estree_walker_1.walk)(ast, {
+        walk(ast, {
             enter(node) {
-                var _a;
                 if (node.type !== 'JSXOpeningElement')
                     return;
                 const mapContext = findMapContext(node, variables);
@@ -439,12 +472,12 @@ function componentTagger(src, map) {
                 if (mapContext) {
                     orchidsId += `@${mapContext.arrayName}`;
                 }
+                
                 // 🔍 Append referenced variable locations for simple identifier references in props
-                (_a = node.attributes) === null || _a === void 0 ? void 0 : _a.forEach((attr) => {
-                    var _a, _b;
+                node.attributes?.forEach((attr) => {
                     if (attr.type === 'JSXAttribute' &&
-                        ((_a = attr.value) === null || _a === void 0 ? void 0 : _a.type) === 'JSXExpressionContainer' &&
-                        ((_b = attr.value.expression) === null || _b === void 0 ? void 0 : _b.type) === 'Identifier') {
+                        attr.value?.type === 'JSXExpressionContainer' &&
+                        attr.value.expression?.type === 'Identifier') {
                         const refName = attr.value.expression.name;
                         const varInfo = variables.get(refName);
                         if (varInfo) {
@@ -452,18 +485,23 @@ function componentTagger(src, map) {
                         }
                     }
                 });
+                
                 // 📍 If inside a map context and we have an index variable, inject data-map-index
-                if (mapContext === null || mapContext === void 0 ? void 0 : mapContext.indexVarName) {
+                if (mapContext?.indexVarName) {
                     ms.appendLeft(node.name.end, ` data-map-index={${mapContext.indexVarName}}`);
                 }
+                
                 ms.appendLeft(node.name.end, ` data-orchids-id="${orchidsId}" data-orchids-name="${semanticName}"`);
                 mutated = true;
             },
         });
+        
         if (!mutated)
             return done(null, src, map);
+        
         const out = ms.toString();
         const outMap = ms.generateMap({ hires: true });
+        
         /* Turbopack expects the sourcemap as a JSON *string*. */
         done(null, out, JSON.stringify(outMap));
     }
@@ -471,3 +509,9 @@ function componentTagger(src, map) {
         done(err);
     }
 }
+
+// Export the loader function to make it a valid webpack loader
+module.exports = function(source, sourceMap) {
+    const callback = this.async();
+    processCode(source, sourceMap, this.resourcePath, callback);
+};
