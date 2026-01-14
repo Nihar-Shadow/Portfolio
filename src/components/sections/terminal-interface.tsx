@@ -162,12 +162,28 @@ This project empowers developers to craft scalable, secure, and real-time operat
 
 - Link: https://ai-powered-defence-system.netlify.app
 
+
 Project 2: EduTracker
 - Description: [Collage Attendance Tracker is a web application that helps colleges keep track of student attendance in a more efficient and organized manner.
 It allows colleges to easily record and manage student attendance, generate reports, and provide insights into attendance patterns.]
 
 - Technologies: [HTML,CSS,JAVASCRIPT]
 - Link: https://attance.netlify.app
+
+Project 3: Vindhu – South Indian Restaurant Website
+- Description: [Vindhu is a restaurant website that offers a unique dining experience for customers. It features a modern and user-friendly interface, with a focus on South Indian cuisine.]
+- Technologies: [HTML,CSS,JAVASCRIPT]
+- Link: https://vindhu.netlify.app
+
+Project 4: FraudShield AI
+- Description: [FraudShield AI is a web application that uses machine learning to detect and prevent fraud in real-time. It provides a secure and efficient way to identify and prevent fraudulent activities.]
+- Technologies: [HTML,CSS,JAVASCRIPT]
+- Link: https://cleareyeaudit.netlify.app/
+
+Project 5: Madurai Cafe Online
+- Description: [Madurai Cafe Online is a web application that allows customers to order food and drinks online. It provides a secure and efficient way to order food and drinks.]
+- Technologies: [HTML,CSS,JAVASCRIPT]
+- Link: https://maduraicafe.netlify.app/
 
 -For more such project checkout my github
 GitHub: https://github.com/Nihar-Shadow
